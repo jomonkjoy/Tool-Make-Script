@@ -2,3 +2,30 @@ SHELL := /bin/bash
 export ROOT_DIR=${PWD}
 
 EXIT_SWITCH := exit
+RUN_DIR := $(ROOT_DIR)/par
+TOP_MODULE := design_top
+DATABASE_DIR := $(RUN_DIR)/bd
+WORK_DIR := $(RUN_DIR)/work
+REPORT_DIR := $(RUN_DIR)/reports
+SOURCE_DIR := $(ROOT_DIR)/rtl
+LIB_DIR := $(ROOT_DIR)/libs
+
+DC_SETUP_TCL := $(RUN_DIR)/dc_setup.tcl
+DC_REPORTS_TCL := $(RUN_DIR)/dc_reports.tcl
+DC_CTL_TCL := $(RUN_DIR)/dc_constrain.tcl
+DC_PRE_DFT_TCL := $(RUN_DIR)/dc_pre_dft.tcl
+DC_RUN_DFT_TCL := $(RUN_DIR)/dc_run_dft.tcl
+DC_RUN_TCL := $(RUN_DIR)/dc_compile.tcl
+DC_RUN_LOG := $(RUN_DIR)/dc_compile.log
+DC_PRE_DFT_LOG := $(RUN_DIR)/dc_pre_dft.log
+DC_RUN_DFT_LOG := $(RUN_DIR)/dc_run_dft.log
+
+FILE_LIST := $(ROOT_DIR)/Libmap
+FILE_LIST_PL := $(RUN_DIR)/file_list.pl
+FILE_LIST_TCL := $(RUN_DIR)/file_list.tcl
+
+LINK_LIBRARY := * core_typ.db
+TARGET_LIBRARY := core_typ.db
+SYMBOL_LIBRARY := core.sdb
+
+#Create user defined variables
