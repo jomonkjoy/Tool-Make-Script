@@ -29,3 +29,40 @@ TARGET_LIBRARY := core_typ.db
 SYMBOL_LIBRARY := core.sdb
 
 #Create user defined variables
+CLK_PORT := clk
+CLK_PERIOD := 4.00
+CLK_SKEW := 0.14
+WC_OP_CONDS := typ_0_1.98
+WIRELOAD_MODEL := 10KGATES
+DRIVE_CELL := buf1a6
+DRIVE_PIN := {Y}
+MAX_OUTPUT_LOAD := [load_of ssc_core/buf1a2/A]
+INPUT_DELAY := 2.0
+OUTPUT_DELAY := 0.5
+MAX_AREA := 380000
+
+DFT_CLK_PERIOD := 100
+DFT_CLK_PORT := TCLK
+DFT_RST_PORT := TRST
+DFT_TM_PORT := TMS
+DFT_DI_PORT := TDI
+DFT_DO_PORT := TDO
+SCAN_CHAIN_COUNT := 1
+
+VCDPLUSON := 1
+ifeq ($(VCDPLUSON),1)
+  DUMP_OPTION = vcdpluson
+  DUMMP_FILE = vcdplus.vpd
+else
+  DUMP_OPTION = dumvars
+  DUMMP_FILE = verilog.dump
+endif
+
+run: clean syn
+
+src:
+  @mkdir $(RUN_DIR);
+  @mkdir $(DATABASE_DIR);
+  @mkdir $(WORK_DIR);
+  @mkdir $(REPORT_DIR);
+  
