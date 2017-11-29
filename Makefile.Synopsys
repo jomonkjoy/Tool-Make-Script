@@ -1,0 +1,4 @@
+SHELL := /bin/bash
+export ROOT_DIR=${PWD}
+
+EXIT_SWITCH := exit
