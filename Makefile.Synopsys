@@ -66,3 +66,34 @@ src:
   @mkdir $(WORK_DIR);
   @mkdir $(REPORT_DIR);
   
+$(FILE_LIST_PL): $(FILE_LIST)
+  @echo "#! /usr/bin/perl" > $@
+  @echo "use warnings;" >> $@
+  @echo "use strict;" >> $@
+  @echo "my \$$HFILE = \"$(FILE_LIST)\";" >> $@
+  @echo "my \$$CFILE = \"$(FILE_LIST_TCL)\";" >> $@
+  @echo "open(HFILEptr,\$$HFILE) || die \"Can't open file: \$$HFILE\\n\";" >> $@
+  @echo "open(CFILEptr,\">\$$CFILE\") || die \"Can't open file: \$$CFILE\\n\";" >> $@
+  @echo "while(<HFILEptr>) {" >> $@
+  @echo " \$$_ =~ s/^\s+\$$//g;" >> $@
+  @echo " chomp;" >> $@
+  @echo " if (/^.*#(.*)/) {" >> $@
+  @echo "   print(CFILEptr \"## \$$_\\n\");" >> $@
+  @echo " }" >> $@
+  @echo " elsif (/^.*.(sv|svg|svh)*/) {" >> $@
+  @echo "   print(CFILEptr \"analyze -f sverilog \$$_\\n\");" >> $@
+  @echo " }" >> $@
+  @echo " elsif (/^.*.(v|vg|vh)*/) {" >> $@
+  @echo "   print(CFILEptr \"analyze -f verilog \$$_\\n\");" >> $@
+  @echo " }" >> $@
+  @echo " else (/^.*.(v|svg|svh)*/) {" >> $@
+  @echo "   print(CFILEptr \"## \$$_\\n\");" >> $@
+  @echo " }" >> $@
+  @echo "}" >> $@
+  @echo "close(HFILEptr);" >> $@
+  @echo "close(CFILEptr);" >> $@
+  
+$(DC_SETUP_TCL):
+  @echo "set_host_options -max_cores 16" > $@
+
+
