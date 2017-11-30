@@ -95,5 +95,52 @@ $(FILE_LIST_PL): $(FILE_LIST)
   
 $(DC_SETUP_TCL):
   @echo "set_host_options -max_cores 16" > $@
+  @echo "set cache_read \"\"" >> $@
+  @echo "set cache_write \"\"" >> $@
+  @echo "set search_path \"\$$search_path $(LIB_DIR) $(DATABASE_DIR) ./\"" >> $@
+  @echo "set link_library \"$(LINK_LIBRARY)\"" >> $@
+  @echo "set target_library \"$(TARGET_LIBRARY)\"" >> $@
+  @echo "set symbol_library \"$(SYMBOL_LIBRARY)\"" >> $@
+  @echo "define_design_lib WORK -path \"$(WORK_DIR)\"" >> $@
 
+$(DC_REPORTS_TCL):
+  @echo "report_timing -transition_time -nets -attributes -nosplit > $(REPORT_DIR)/$(TOPMODULE)_\$${report_type}_timming.rpt" > $@
+  @echo "report_area -nosplit -hierarchy > $(REPORT_DIR)/$(TOPMODULE)_\$${report_type}_area.rpt" >> $@
+  @echo "report_power -nosplit -hierarchy > $(REPORT_DIR)/$(TOPMODULE)_\$${report_type}_power.rpt" >> $@
+  @echo "report_reference -nosplit -hierarchy > $(REPORT_DIR)/$(TOPMODULE)_\$${report_type}_reference.rpt" >> $@
+  @echo "report_resources -nosplit -hierarchy > $(REPORT_DIR)/$(TOPMODULE)_\$${report_type}_resources.rpt" >> $@
+  @echo "report_constraints > $(REPORT_DIR)/$(TOPMODULE)_\$${report_type}_constraints.rpt" >> $@
+  @echo "report_design > $(REPORT_DIR)/$(TOPMODULE)_\$${report_type}_design.rpt" >> $@
+  @echo "report_hierarchy > $(REPORT_DIR)/$(TOPMODULE)_\$${report_type}_hierarchy.rpt" >> $@
+  @echo "report_clock > $(REPORT_DIR)/$(TOPMODULE)_\$${report_type}_clock.rpt" >> $@
+  @echo "report_clock_gating > $(REPORT_DIR)/$(TOPMODULE)_\$${report_type}_clock_gating
+  @echo "write_script -format dctcl -output > $(REPORT_DIR)/$(TOPMODULE)_\$${report_type}.tcl" >> $@.rpt" >> $@
+  
+$(DC_RUN_TCL): $(DC_SETUP_TCL) $(DC_REPORTS_TCL) $(DC_CTL_TCL) $(FILE_LIST_PL)
+  @echo "source $(DC_SETUP_TCL)" > $@
+  @echo "source $(FILE_LIST_TCL)" >> $@
+  @echo "elaborate $(TOPMODULE)" >> $@
+  @echo "current_design $(TOPMODULE)" >> $@
+  @echo "uniquify" >> $@
+  @echo "source $(DC_CTL_TCL)" >> $@
+  @echo "check_design" >> $@
+  @echo "write -format ddc -heirarchy -output $(DATABASE_DIR)/$(TOPMODULE)_gtech.ddc" >> $@
+  @echo "write -format verilog -heirarchy -output $(DATABASE_DIR)/$(TOPMODULE)_gtech.v" >> $@
+  @echo "compile" >> $@
+  @echo "write -format ddc -heirarchy -output $(DATABASE_DIR)/$(TOPMODULE)_mapped.ddc" >> $@
+  @echo "write -format verilog -heirarchy -output $(DATABASE_DIR)/$(TOPMODULE)_mapped.v" >> $@
+  @echo "write_sdf $(RUN_DIR)/$(TOPMODULE)_mapped.sdf" >> $@
+  @echo "write_sdc -nosplit $(RUN_DIR)/$(TOPMODULE)_mapped.sdc" >> $@
+  @echo "write_milkyway -overwrite -output \"$(RUN_DIR)/$(TOPMODULE)_mapped_DCT\"" >> $@
+  @echo "set report_type mapped" >> $@
+  @echo "source $(DC_REPORTS_TCL)" >> $@
+  @echo "compile_ultra -gate_clock -no_autoungroup" >> $@
+  @echo "write -format ddc -heirarchy -output $(DATABASE_DIR)/$(TOPMODULE)_ultra_mapped.ddc" >> $@
+  @echo "write -format verilog -heirarchy -output $(DATABASE_DIR)/$(TOPMODULE)_ultra_mapped.v" >> $@
+  @echo "write_sdf $(RUN_DIR)/$(TOPMODULE)_ultra_mapped.sdf" >> $@
+  @echo "write_sdc -nosplit $(RUN_DIR)/$(TOPMODULE)_ultra_mapped.sdc" >> $@
+  @echo "write_milkyway -overwrite -output \"$(RUN_DIR)/$(TOPMODULE)_ultra_mapped_DCT\"" >> $@  @echo "set report_type mapped" >> $@
+  @echo "set report_type ultra_mapped" >> $@
+  @echo "source $(DC_REPORTS_TCL)" >> $@
 
+  
