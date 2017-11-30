@@ -150,4 +150,79 @@ $(DC_RUN_TCL): $(DC_SETUP_TCL) $(DC_REPORTS_TCL) $(DC_CTL_TCL) $(FILE_LIST_PL)
   @echo "set report_type ultra_mapped" >> $@
   @echo "source $(DC_REPORTS_TCL)" >> $@
 
+$(DC_PRE_DFT_TCL): $(DC_SETUP_TCL) $(DC_REPORTS_TCL)
+  @echo "source $(DC_SETUP_TCL)" >> $@
+  @echo "read_file -format dc $(DATABASE_DIR)/$(TOPMODULE)_mapped.ddc" >> $@
+  @echo "current_design $(TOPMODULE)" >> $@
+  @echo "set_scan_configuration -style multiplexed_flip_flop" >> $@
+  # set DFT signals
+  @echo "set test_default_period $(DFT_CLK_PERIOD)" >> $@
+  @echo "set_dft_signal -view existing_dft -type ScanClock -timing {45 55} -port $(DFT_CLK_PORT)" >> $@
+  @echo "set_dft_signal -view existing_dft -type Constant -active_state 1 -port $(DFT_TM_PORT)" >> $@
+  @echo "set_dft_signal -view existing_dft -type Reset -active_state 0 -port $(DFT_RST_PORT)" >> $@
+  # create test protocol
+  @echo "create_test_protocol" >> $@
+  # Pre-DFT : Check scan design rule defore scan chain synthesis
+  @echo "dft_drc" >> $@
+  @echo "compile_ultra -gate_clock -scan -no_autoungroup" >> $@
+  # write out the test protocol and scan-ready design
+  @echo "write_test_protocol -output $(DATABASE_DIR)/$(TOPMODULE)_ultra_scan.spf" >> $@
+  @echo "write -format ddc -heirarchy -output $(DATABASE_DIR)/$(TOPMODULE)_ultra_scan_mapped.ddc" >> $@
+  @echo "write -format verilog -heirarchy -output $(DATABASE_DIR)/$(TOPMODULE)_ultra_scan_mapped.v" >> $@
+  @echo "write_sdf $(RUN_DIR)/$(TOPMODULE)_ultra_scan_mapped.sdf" >> $@
+  @echo "write_sdc -nosplit $(RUN_DIR)/$(TOPMODULE)_ultra_scan_mapped.sdc" >> $@
+  # generate reports
+  @echo "set report_type ultra_scan_mapped" >> $@
+  @echo "source $(DC_REPORTS_TCL)" >> $@
+
+$(DC_RUN_DFT_TCL): $(DC_SETUP_TCL) $(DC_REPORTS_TCL)
+  @echo "source $(DC_SETUP_TCL)" >> $@
+  @echo "read_file -format dc $(DATABASE_DIR)/$(TOPMODULE)_ultra_scan_mapped.ddc" >> $@
+  @echo "current_design $(TOPMODULE)" >> $@
+  @echo "link" >> $@
+  # Read deign & test protocol
+  @echo "read_test_protocol $(DATABASE_DIR)/$(TOPMODULE)_ultra_scan.spf" >> $@
+  # set global attribute for sacn paths in the current design
+  @echo "set_scan configuration -chain_count $(SCAN_CHAIN_COUNT)" >> $@
+  @echo "set_scan configuration -clock_mixing no_mix" >> $@
+  @echo "set_dft_signal -view spec -type ScanEable -active_state 1 -port $(DFT_TM_PORT)" >> $@
+  @echo "set_dft_signal -view spec -type ScanDataIn -port $(DFT_DI_PORT)" >> $@
+  @echo "set_dft_signal -view spec -type ScanDataOut -port $(DFT_DO_PORT)" >> $@
+  @echo "set_scan_path chain1 -scan_data_in $(DFT_DI_PORT) -scan_data_out $(DFT_DO_PORT)" >> $@
+  # Check scan-path consistency & Scan preview
+  @echo "preview_dft -show all" >> $@
+  # Scan Chain Synthesis /Scan Insertion
+  @echo "insert_dft" >> $@
+  # Scan Chain Identifiction
+  @echo "set_scan_state scan_existing" >> $@
+  # Post-DFT DRC : Check scan design rule after scan chain synthesis
+  @echo "dft_drc -coverage_estimate" >> $@
+  # Report scan information/Handoff Design
+  @echo "report_scan_path -view existing_dft -chain all" >> $@
+  @echo "report_scan_path -view existing_dft -cell all" >> $@
+  # Prepare TetraMax scrit/Handoff Design
+  @echo "change_name -hierarchy -rules verilog" >> $@
+  @echo "write -format ddc -heirarchy -output $(DATABASE_DIR)/$(TOPMODULE)_dft.ddc" >> $@
+  @echo "write -format verilog -heirarchy -output $(DATABASE_DIR)/$(TOPMODULE)_dft.v" >> $@
+  @echo "write_sdf $(RUN_DIR)/$(TOPMODULE)_dft.sdf" >> $@
+  @echo "write_sdc -nosplit $(RUN_DIR)/$(TOPMODULE)_dft.sdc" >> $@
+  # generate reports
+  @echo "set report_type dft" >> $@
+  @echo "source $(DC_REPORTS_TCL)" >> $@
+
+$(DC_CTL_TCL):
+  @echo "create_clock -period $(CLK_PERIOD) -name my_clock $(CLK_PORT)" >> $@
+  @echo "set_dont_touch_network my_clock" >> $@
+  # Time Budget
+  @echo "set_clock_uncertainity $(CLK_SKEW) [get_clocks my_clock]" >> $@
+  @echo "set_input_delay $(INPUT_DELAY) -max -clock my_clock [remove_from_collection [all_inputs] $(CLK_PORT)]" >> $@
+  @echo "set_output_delay $(OUTPUT_DELAY) -max -clock my_clock [all_outputs]" >> $@
+  # Area Constraint
+  @echo "set_max_area $(MAX_AREA)" >> $@
+  # Operating Environment
+  @echo "set_operating_conditions -max $(WC_OP_CONDS)" >> $@
+  @echo "set_wire_load_model -name $(WIRELOAD_MODEL)" >> $@
+  @echo "set_driving_cell -cell $(DRIVE_CELL) -pin $(DRIVE_PIN) [remove_from_collection [all_inputs] $(CLK_PORT)]" >> $@
+  @echo "set_load $(MAX_OUTPUT_LOAD) [all_outputs]" >> $@
   
+
