@@ -118,28 +118,35 @@ $(DC_REPORTS_TCL):
   
 $(DC_RUN_TCL): $(DC_SETUP_TCL) $(DC_REPORTS_TCL) $(DC_CTL_TCL) $(FILE_LIST_PL)
   @echo "source $(DC_SETUP_TCL)" > $@
+  # Transilate HDL to intermediate format
   @echo "source $(FILE_LIST_TCL)" >> $@
+  # Build generic technology datbase
   @echo "elaborate $(TOPMODULE)" >> $@
+  # designate the design to synthesize
   @echo "current_design $(TOPMODULE)" >> $@
   @echo "uniquify" >> $@
   @echo "source $(DC_CTL_TCL)" >> $@
   @echo "check_design" >> $@
   @echo "write -format ddc -heirarchy -output $(DATABASE_DIR)/$(TOPMODULE)_gtech.ddc" >> $@
   @echo "write -format verilog -heirarchy -output $(DATABASE_DIR)/$(TOPMODULE)_gtech.v" >> $@
+  # compile the design
   @echo "compile" >> $@
   @echo "write -format ddc -heirarchy -output $(DATABASE_DIR)/$(TOPMODULE)_mapped.ddc" >> $@
   @echo "write -format verilog -heirarchy -output $(DATABASE_DIR)/$(TOPMODULE)_mapped.v" >> $@
   @echo "write_sdf $(RUN_DIR)/$(TOPMODULE)_mapped.sdf" >> $@
   @echo "write_sdc -nosplit $(RUN_DIR)/$(TOPMODULE)_mapped.sdc" >> $@
   @echo "write_milkyway -overwrite -output \"$(RUN_DIR)/$(TOPMODULE)_mapped_DCT\"" >> $@
+  # generate reports
   @echo "set report_type mapped" >> $@
   @echo "source $(DC_REPORTS_TCL)" >> $@
+  # ultra compile
   @echo "compile_ultra -gate_clock -no_autoungroup" >> $@
   @echo "write -format ddc -heirarchy -output $(DATABASE_DIR)/$(TOPMODULE)_ultra_mapped.ddc" >> $@
   @echo "write -format verilog -heirarchy -output $(DATABASE_DIR)/$(TOPMODULE)_ultra_mapped.v" >> $@
   @echo "write_sdf $(RUN_DIR)/$(TOPMODULE)_ultra_mapped.sdf" >> $@
   @echo "write_sdc -nosplit $(RUN_DIR)/$(TOPMODULE)_ultra_mapped.sdc" >> $@
   @echo "write_milkyway -overwrite -output \"$(RUN_DIR)/$(TOPMODULE)_ultra_mapped_DCT\"" >> $@  @echo "set report_type mapped" >> $@
+  # generate reports
   @echo "set report_type ultra_mapped" >> $@
   @echo "source $(DC_REPORTS_TCL)" >> $@
 
