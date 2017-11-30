@@ -52,10 +52,10 @@ SCAN_CHAIN_COUNT := 1
 VCDPLUSON := 1
 ifeq ($(VCDPLUSON),1)
   DUMP_OPTION = vcdpluson
-  DUMMP_FILE = vcdplus.vpd
+  DUMP_FILE = vcdplus.vpd
 else
   DUMP_OPTION = dumvars
-  DUMMP_FILE = verilog.dump
+  DUMP_FILE = verilog.dump
 endif
 
 run: clean syn
@@ -225,4 +225,37 @@ $(DC_CTL_TCL):
   @echo "set_driving_cell -cell $(DRIVE_CELL) -pin $(DRIVE_PIN) [remove_from_collection [all_inputs] $(CLK_PORT)]" >> $@
   @echo "set_load $(MAX_OUTPUT_LOAD) [all_outputs]" >> $@
   
+syn: src $(DC_RUN_TCL)
+  @perl $(FILE_LIST_PL);
+  @dc_shell -x "source $(DC_RUN_TCL); $(EXIT_SWITCH)" | tee $(DC_RUN_LOG)
+  
+pre_dft: $(DC_PRE_DFT_TCL)
+  @dc_shell -x "source $(DC_PRE_DFT_TCL); $(EXIT_SWITCH)" | tee $(DC_PRE_DFT_LOG)
 
+run_dft: $(DC_RUN_DFT_TCL)
+  @dc_shell -x "source $(DC_RUN_DFT_TCL); $(EXIT_SWITCH)" | tee $(DC_RUN_DFT_LOG)
+
+dft: syn pre_dft run_dft
+
+clean:
+  @rm -rf $(RUN_DR)
+  @rm -rf csrc
+  @rm -rf simv*
+  @rm -rf verilog.dump*
+  @rm -rf vcdplus.vpd
+  @rm -rf DVEfiles
+  
+sim:
+  @vcs  -sverilog \
+        -f file_list \
+        -timesacle=1ps/1ps \
+        +define+no_unit_delay \
+        +nospecify \
+        +vcs+$(DUMP_OPTION) \
+        +lint=DSFIF \
+        +incdir+$(SOURCE_DIR)
+  @./simv
+  
+dve:
+  @dve -vpd $(DUMP_FILE) &
+  
