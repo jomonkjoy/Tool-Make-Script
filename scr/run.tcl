@@ -6,6 +6,8 @@ write -hier -o "${db_path}ChipLevel_init.db"
 } else {
 write -format ddc -hier -o "${ddc_path}ChipLevel_init.ddc"
 }
+# output netlist
+write -format verilog -hier -o "${netlist_path}ChipLevel_init.v"
 # Characterize and write_script for all modules 
 source "${script_path}characterize.tcl"
 # Recompile all modules using write_script constraints 
@@ -17,3 +19,5 @@ write -hier -out "${db_path}ChipLevel_final.db"
 } else {
 write -format ddc -hier -out "${ddc_path}ChipLevel_final.ddc"
 }
+# output netlist
+write -format verilog -hier -o "${netlist_path}ChipLevel_final.v"
