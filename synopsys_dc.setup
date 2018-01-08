@@ -1,0 +1,15 @@
+# Define the target logic library, symbol library, 
+# and link libraries
+set target_library lsi_10k.db
+set symbol_library lsi_10k.sdb
+set link_library [concat $target_library "*"]
+set search_path [concat $search_path ./src]
+set designer "Your Name"
+set company "Synopsys, Inc."
+# Define path directories for file locations
+set source_path "./src/"
+set script_path "./scr/"
+set log_path "./log/"
+set ddc_path "./ddc/"
+set db_path "./db/"
+set netlist_path "./netlist/" 
