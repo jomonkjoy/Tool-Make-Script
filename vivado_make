@@ -7,10 +7,10 @@ all : place_n_route
 # bitstream : Creates device bitstream
 bitstream : ./${DESIGN}.bit
 # place_n_route: Stops after place and route for analysis prior to bitstream
-generation
+# generation
 place_n_route : ./${DESIGN}_route.dcp
 # translate: Stops after full design elaboration and initial optimization for
-analysis and floorplanning prior to place and route step
+# analysis and floorplanning prior to place and route step
 translate : ./${DESIGN}_opt.dcp
 # Following calls Tcl files for each desired portion of the Vivado run
 # Design checkpoint files and bit file used for dependency management
