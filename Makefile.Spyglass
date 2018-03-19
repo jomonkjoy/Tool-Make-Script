@@ -1,3 +1,40 @@
-FILE_LIST := $(ROOT_DIR)/Libmap
-FILE_LIST_PL := $(RUN_DIR)/file_list.pl
-FILE_LIST_TCL := $(RUN_DIR)/file_list.tcl
+RUN_DIR ?: $(ROOT_DIR)/lint
+
+FILE_LIST ?= $(ROOT_DIR)/Libmap
+FILE_LIST_PL ?= $(RUN_DIR)/file_list.pl
+FILE_LIST_TCL ?= $(RUN_DIR)/file_list.tcl
+
+src:
+  @mkdir $(RUN_DIR);
+  
+$(FILE_LIST_PL): $(FILE_LIST)
+  @echo "#! /usr/bin/perl" > $@
+  @echo "use warnings;" >> $@
+  @echo "use strict;" >> $@
+  @echo "my \$$HFILE = \"$(FILE_LIST)\";" >> $@
+  @echo "my \$$CFILE = \"$(FILE_LIST_TCL)\";" >> $@
+  @echo "open(HFILEptr,\$$HFILE) || die \"Can't open file: \$$HFILE\\n\";" >> $@
+  @echo "open(CFILEptr,\">\$$CFILE\") || die \"Can't open file: \$$CFILE\\n\";" >> $@
+  @echo "while(<HFILEptr>) {" >> $@
+  @echo " \$$_ =~ s/^\s+\$$//g;" >> $@
+  @echo " chomp;" >> $@
+  @echo " if (/^.*#(.*)/) {" >> $@
+  @echo "   print(CFILEptr \"## \$$_\\n\");" >> $@
+  @echo " }" >> $@
+  @echo " elsif (/^.*\.(sgcd)\$$/) {" >> $@
+  @echo "   print(CFILEptr \"read_file -type sgdc \$$_\\n\");" >> $@
+  @echo " }" >> $@
+  @echo " elsif (/^.*\.(vhd|vhdl)\$$/) {" >> $@
+  @echo "   print(CFILEptr \"read_file -type vhdl \$$_\\n\");" >> $@
+  @echo " }" >> $@
+  @echo " elsif (/^.*\.(sv|v|vg|vh)\$$/) {" >> $@
+  @echo "   print(CFILEptr \"read_file -type verilog \$$_\\n\");" >> $@
+  @echo " }" >> $@
+  @echo " else {" >> $@
+  @echo "   print(CFILEptr \"## \$$_\\n\");" >> $@
+  @echo " }" >> $@
+  @echo "}" >> $@
+  @echo "close(HFILEptr);" >> $@
+  @echo "close(CFILEptr);" >> $@
+  
+
