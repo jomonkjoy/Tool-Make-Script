@@ -1,0 +1,3 @@
+FILE_LIST := $(ROOT_DIR)/Libmap
+FILE_LIST_PL := $(RUN_DIR)/file_list.pl
+FILE_LIST_TCL := $(RUN_DIR)/file_list.tcl
