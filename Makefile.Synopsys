@@ -113,8 +113,8 @@ $(DC_REPORTS_TCL):
   @echo "report_design > $(REPORT_DIR)/$(TOPMODULE)_\$${report_type}_design.rpt" >> $@
   @echo "report_hierarchy > $(REPORT_DIR)/$(TOPMODULE)_\$${report_type}_hierarchy.rpt" >> $@
   @echo "report_clock > $(REPORT_DIR)/$(TOPMODULE)_\$${report_type}_clock.rpt" >> $@
-  @echo "report_clock_gating > $(REPORT_DIR)/$(TOPMODULE)_\$${report_type}_clock_gating
-  @echo "write_script -format dctcl -output > $(REPORT_DIR)/$(TOPMODULE)_\$${report_type}.tcl" >> $@.rpt" >> $@
+  @echo "report_clock_gating > $(REPORT_DIR)/$(TOPMODULE)_\$${report_type}_clock_gating.rpt" >> $@
+  @echo "write_script -format dctcl -output > $(REPORT_DIR)/$(TOPMODULE)_\$${report_type}.tcl" >> $@
   
 $(DC_RUN_TCL): $(DC_SETUP_TCL) $(DC_REPORTS_TCL) $(DC_CTL_TCL) $(FILE_LIST_PL)
   @echo "source $(DC_SETUP_TCL)" > $@
