@@ -1,8 +1,17 @@
-RUN_DIR ?: $(ROOT_DIR)/lint
+SHELL ?= /bin/bash
+export ROOT_DIR=${PWD}
+
+TOP_MODULE ?= design_top
+RUN_DIR ?= $(ROOT_DIR)/lint
+
+SG_RUN_TCL ?= $(RUN_DIR)/sg_compile.tcl
+SG_RUN_LOG ?= $(RUN_DIR)/sg_compile.log
 
 FILE_LIST ?= $(ROOT_DIR)/Libmap
 FILE_LIST_PL ?= $(RUN_DIR)/file_list.pl
 FILE_LIST_TCL ?= $(RUN_DIR)/file_list.tcl
+
+run: clean lint
 
 src:
   @mkdir $(RUN_DIR);
@@ -36,5 +45,11 @@ $(FILE_LIST_PL): $(FILE_LIST)
   @echo "}" >> $@
   @echo "close(HFILEptr);" >> $@
   @echo "close(CFILEptr);" >> $@
-  
 
+lint: src $(SG_RUN_TCL)
+  @perl $(FILE_LIST_PL);
+  @sg_shell -tcl $(SG_RUN_TCL) -shell_log_file $(SG_RUN_LOG)
+
+clean:
+  @rm -rf $(RUN_DR)
+  
