@@ -46,6 +46,14 @@ $(FILE_LIST_PL): $(FILE_LIST)
   @echo "close(HFILEptr);" >> $@
   @echo "close(CFILEptr);" >> $@
 
+$(SG_RUN_TCL): $(FILE_LIST_PL)
+  @echo "new_project $(TOP_MODULE)_new.prj -projectwdir $(RUN_DIR)" >> $@
+  @echo "source $(FILE_LIST_TCL)" >> $@
+  @echo "set_option language_mode mixed" >> $@
+  @echo "set_option enableSV yes" >> $@
+  @echo "set_option top $(TOP_MODULE)" >> $@
+  @echo "exit -save -force" >> $@
+
 lint: src $(SG_RUN_TCL)
   @perl $(FILE_LIST_PL);
   @sg_shell -tcl $(SG_RUN_TCL) -shell_log_file $(SG_RUN_LOG)
