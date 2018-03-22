@@ -6,7 +6,12 @@ RUN_DIR ?= $(ROOT_DIR)/lint
 
 SG_RUN_TCL ?= $(RUN_DIR)/sg_compile.tcl
 SG_RUN_LOG ?= $(RUN_DIR)/sg_compile.log
-
+SG_METHODOLOGY ?= \$$SPYGLASS_HOME/GuideWare2.0/block/rtl_handoff
+SG_GOAL_LIST ?= lint/lint_rtl \
+                lint/lint_abstract \
+                adv_lint/adv_lint_struct \
+                adv_lint/adv_lint_verify
+                
 FILE_LIST ?= $(ROOT_DIR)/Libmap
 FILE_LIST_PL ?= $(RUN_DIR)/file_list.pl
 FILE_LIST_TCL ?= $(RUN_DIR)/file_list.tcl
@@ -52,6 +57,14 @@ $(SG_RUN_TCL): $(FILE_LIST_PL)
   @echo "set_option language_mode mixed" >> $@
   @echo "set_option enableSV yes" >> $@
   @echo "set_option top $(TOP_MODULE)" >> $@
+  @echo "current_methodology $(SG_METHODOLOGY)" >> $@
+  @echo "write_report goal_summary > $(RUN_DIR)/$(TOP_MODULE)_goal_summary_init.rpt" >> $@
+  @echo "link_design -force" >> $@
+  @echo "compile_design -force -top $(TOP_MODULE)" >> $@
+  @echo "set goal_list [list $(SG_GOAL_LIST)]" >> $@
+  @echo "run_goal -goal \$${goal_list}" >> $@
+  @echo "write_report goal_summary > $(RUN_DIR)/$(TOP_MODULE)_goal_summary_final.rpt" >> $@
+  @echo "write_aggregate_report project_summary -reportdir $(RUN_DIR)/$(TOP_MODULE)" >> $@
   @echo "exit -save -force" >> $@
 
 lint: src $(SG_RUN_TCL)
