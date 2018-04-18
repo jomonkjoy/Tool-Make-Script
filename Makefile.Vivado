@@ -1,0 +1,72 @@
+SHELL ?= /bin/bash
+export ROOT_DIR=${PWD}
+
+TOP_MODULE ?= design_top
+RUN_DIR ?= $(ROOT_DIR)/vivado_results
+
+VIVADO_SYN_TCL ?= $(RUN_DIR)/vivado_synthesis.tcl
+VIVADO_SYN_LOG ?= $(RUN_DIR)/vivado_synthesis.log
+VIVADO_PAR_TCL ?= $(RUN_DIR)/vivado_place_route.tcl
+VIVADO_PAR_LOG ?= $(RUN_DIR)/vivado_place_route.log
+VIVADO_BIT_TCL ?= $(RUN_DIR)/vivado_bitgen.tcl
+VIVADO_BIT_LOG ?= $(RUN_DIR)/vivado_bitgen.log
+
+FILE_LIST ?= $(ROOT_DIR)/Libmap
+FILE_LIST_PL ?= $(RUN_DIR)/file_list.pl
+FILE_LIST_TCL ?= $(RUN_DIR)/file_list.tcl
+
+run: clean bit
+
+src:
+  @mkdir $(RUN_DIR);
+  
+$(FILE_LIST_PL): $(FILE_LIST)
+  @echo "#! /usr/bin/perl" > $@
+  @echo "use warnings;" >> $@
+  @echo "use strict;" >> $@
+  @echo "my \$$HFILE = \"$(FILE_LIST)\";" >> $@
+  @echo "my \$$CFILE = \"$(FILE_LIST_TCL)\";" >> $@
+  @echo "open(HFILEptr,\$$HFILE) || die \"Can't open file: \$$HFILE\\n\";" >> $@
+  @echo "open(CFILEptr,\">\$$CFILE\") || die \"Can't open file: \$$CFILE\\n\";" >> $@
+  @echo "while(<HFILEptr>) {" >> $@
+  @echo " \$$_ =~ s/^\s+\$$//g;" >> $@
+  @echo " chomp;" >> $@
+  @echo " if (/^.*#(.*)/) {" >> $@
+  @echo "   print(CFILEptr \"## \$$_\\n\");" >> $@
+  @echo " }" >> $@
+  @echo " elsif (/^.*\.(sgcd)\$$/) {" >> $@
+  @echo "   print(CFILEptr \"read_file -type sgdc \$$_\\n\");" >> $@
+  @echo " }" >> $@
+  @echo " elsif (/^.*\.(vhd|vhdl)\$$/) {" >> $@
+  @echo "   print(CFILEptr \"read_file -type vhdl \$$_\\n\");" >> $@
+  @echo " }" >> $@
+  @echo " elsif (/^.*\.(sv|v|vg|vh)\$$/) {" >> $@
+  @echo "   print(CFILEptr \"read_file -type verilog \$$_\\n\");" >> $@
+  @echo " }" >> $@
+  @echo " else {" >> $@
+  @echo "   print(CFILEptr \"## \$$_\\n\");" >> $@
+  @echo " }" >> $@
+  @echo "}" >> $@
+  @echo "close(HFILEptr);" >> $@
+  @echo "close(CFILEptr);" >> $@
+
+$(VIVADO_SYN_TCL): $(FILE_LIST_PL)
+  @echo "link_design -part $(DEVICE)" >> $@
+  @echo "source $(FILE_LIST_TCL)" >> $@
+
+syn: src $(VIVADO_SYN_TCL)
+  @perl $(FILE_LIST_PL);
+  @echo "###### vivado synthesis started #######\n";
+  @vivado -mode batch -source $(VIVADO_SYN_TCL) | tee $(VIVADO_SYN_LOG)
+  @echo "###### vivado synthesis ends #######\n";
+  
+par: src $(VIVADO_PAR_TCL)
+  @vivado -mode batch -source $(VIVADO_PAR_TCL) | tee $(VIVADO_PAR_LOG)
+  
+bit: src $(VIVADO_BIT_TCL)
+  @vivado -mode batch -source $(VIVADO_BIT_TCL) | tee $(VIVADO_BIT_LOG)
+  
+clean:
+  @rm -rf $(RUN_DR)
+  
+  
