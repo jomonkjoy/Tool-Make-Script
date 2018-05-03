@@ -34,4 +34,28 @@ create_supply_set pwrdomain_glue_ss \
        -function {power pwrdomain_glue_net} \
        -function {ground VSS_net}
        
+############################################
+## create POWER-DOMAIN using supply set
+############################################
 
+create_power_domain pd_always_on -include_scope \
+       -supply {primary pwrdomain_1p5_ss}
+       
+create_power_domain pd_gluelogic \
+       -supply {primary pwrdomain_glue_ss} \
+       -supply {default_restoration pwrdomain_1p5_ss} \
+       -supply {default_isolation pwrdomain_1p5_ss} \
+       -element {inst_gluelogic inst_shiftmem}
+
+############################################
+## create power switches for gated domain
+############################################
+
+create_power_switch sw_gluelogic \
+       -domain pd_gluelogic \
+       -input_supply_port {vin_p pwrdomain_1p5_ss.power} \
+       -output_supply_port {vout_p pwrdomain_glue_ss.power} \
+       -control_port {ctrl_p sw_gluelogic_en} \
+       -on_state {normal vin_p {ctrl_p}} \
+       -off_state {off_state {!ctrl_p}}
+       
