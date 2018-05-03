@@ -1,1 +1,37 @@
 ## block level UPF for interleave module
+############################################
+## create supply port/net
+############################################
+
+create_supply_port VDD_1p5_port
+create_supply_port VDD_0p8_port
+create_supply_port VSS_port
+
+create_supply_net VDD_1p5_net
+create_supply_net VDD_0p8_net
+create_supply_net VSS_net
+
+connect_supply_net VDD_1p5_net -port VDD_1p5_port
+connect_supply_net VDD_0p8_net -port VDD_0p8_port
+connect_supply_net VSS_net -port VSS_port
+
+############################################
+## create supply set for POWER-DOMAINs
+############################################
+
+## 1.5 feeder supply set 
+create_supply_set pwrdomain_1p5_ss \
+       -function {power VDD_1p5_net} \
+       -function {ground VSS_net}
+       
+## 0.8 feeder supply set       
+create_supply_set pwrdomain_0p8_ss \
+       -function {power VDD_0p8_net} \
+       -function {ground VSS_net}
+       
+## internal switch supply set       
+create_supply_set pwrdomain_glue_ss \
+       -function {power pwrdomain_glue_net} \
+       -function {ground VSS_net}
+       
+
