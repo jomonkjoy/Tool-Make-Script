@@ -47,6 +47,10 @@ create_power_domain pd_gluelogic \
        -supply {default_isolation pwrdomain_1p5_ss} \
        -element {inst_gluelogic inst_shiftmem}
 
+create_power_domain pd_sram \
+       -supply {primary pwrdomain_0p8_ss} \
+       -element {inst_gluelogic inst_shiftmem\inst_sram}
+
 ############################################
 ## create power switches for gated domain
 ############################################
@@ -59,3 +63,5 @@ create_power_switch sw_gluelogic \
        -on_state {normal vin_p {ctrl_p}} \
        -off_state {off_state {!ctrl_p}}
        
+       
+set_level_shifter 
