@@ -66,5 +66,46 @@ create_power_switch sw_gluelogic \
        -on_state {normal vin_p {ctrl_p}} \
        -off_state {off_state {!ctrl_p}}
        
-       
-set_level_shifter 
+## level shifter from 1.5v to 0.8v       
+set_level_shifter ls_sram_in \
+       -domain pd_sram \
+       -applies_to inputs \
+       -rule high_to_low \
+       -location self \
+       -input_supply_set {pwrdomain_1p5_ss} \
+       -output_supply_set {pwrdomain_0p8_ss}
+
+## level shifter from 0.8v to 1.5v
+set_level_shifter ls_sram_out \
+       -domain pd_sram \
+       -applies_to outputs \
+       -rule low_to_high \
+       -location self \
+       -input_supply_set {pwrdomain_0p8_ss} \
+       -output_supply_set {pwrdomain_1p5_ss}
+
+## isolation cells for all outputs from GATED-DOMAIN to AON
+set_isolation iso_gluelogic \
+       -domain pd_gluelogic \
+       -clamp_value 0 \
+       -isolation_signal iso_en_gluelogic \
+       -isolation_sense high \
+       -location parent \
+       -applies_to output
+
+## retention flops for block
+set_retention ret_gluelogic \
+       -domain pd_gluelogic \
+       -save_signal {ret_en_gluelogic high} \
+       -restore_signal {ret_en_gluelogic low}
+
+set_retention ret_shiftmem \
+       -domain pd_gluelogic \
+       -save_signal {ret_en_shiftmem high} \
+       -restore_signal {ret_en_shiftmem low}
+
+############################################
+## create power state table [PST]
+############################################
+
+create_pst pst_top -supples
