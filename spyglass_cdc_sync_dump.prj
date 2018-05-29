@@ -1,0 +1,31 @@
+## Usage: spyglass -project spyglass_cdc_sync_dump_goal.prj -goal sg_cdc_dump_goal -batch
+define_goal sg_cdc_dump_goal  -policy {clock-reset} {
+
+## only 4 rules required to dump the synchronizers , this will not dump the reset sync cell.
+set_goal_option rules { Ac_unsync01 Ac_unsync02 Ac_sync01 Ac_sync02}
+
+## SynchInfo will be the file where spyglass will dump all the sync flop
+## moresimple will be dump if defined below.
+set_goal_option report { SynchInfo moresimple}
+
+## wild card can be use here , this info tool will use to identify the sync cell , this can be any standard pattern.
+set_parameter synchronize_cells "*sync1*, *sync2*"
+
+## Same as above but will recognize the reset sync cell.
+set_parameter reset_synchronize_cells "*rst_sync*" 
+
+## This is important, this will enable tool to dump the sync list. 
+set_parameter dump_sync_info detailed
+
+## This is optional and can be used if you have static mux before the sync cell.
+set_parameter allow_combo_logic yes 
+
+## This is optional and required if you data signal is coming from different source and then going to sync cell. All source must be quasi-static and should not change simultaneously.
+set_parameter allow_merged_qualifier yes
+
+## This parameters can be used , it will reduce the pessimism and will dump all the flops where tool is finding the clock domain crossing.
+set_parameter enable_and_sync yes 
+set_parameter cdc_reduce_pessimism all
+set_parameter strict_sync_check yes
+set_parameter enable_debug_data yes
+}
